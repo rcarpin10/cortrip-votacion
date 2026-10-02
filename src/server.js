@@ -1,7 +1,8 @@
-const express = require('express'); const { Pool } = require('pg'); const rate = require('express-rate-limit');
+const express = require('express'); const path = require('path'); const { Pool } = require('pg'); const rate = require('express-rate-limit');
 const k = require('./crypto'); const enviar = require('./whatsapp');
 const db = new Pool({ connectionString: process.env.DATABASE_URL });
 const app = express(); app.use(express.json());
+app.use(express.static(path.join(__dirname, '..', 'public'))); // las pantallas viven en el mismo servicio
 app.use((q, s, n) => { // CORS: solo el sitio de votación puede llamar a la API
   s.set({ 'Access-Control-Allow-Origin': process.env.ORIGEN_PERMITIDO || '*', 'Access-Control-Allow-Headers': 'Content-Type,x-admin-token', 'Access-Control-Allow-Methods': 'GET,POST,OPTIONS' });
   q.method === 'OPTIONS' ? s.sendStatus(204) : n(); });
