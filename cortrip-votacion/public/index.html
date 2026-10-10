@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CORTRIP · Votación electrónica</title>
+<style>
+:root{--tinta:#14304f;--mar:#1f5a8a;--papel:#f3f6f9;--blanco:#fff;--latón:#a98530;--ok:#1d6b45;--error:#a3262a;--linea:#cfd8e1;--texto:#1c2833}
+@media(prefers-color-scheme:dark){:root{--tinta:#cfe0f0;--mar:#7fb3de;--papel:#0f1a26;--blanco:#17263a;--latón:#d4b25a;--ok:#5fc78f;--error:#ff8a8d;--linea:#2c4058;--texto:#e6edf3}}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--papel);color:var(--texto);font:17px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+header{background:var(--tinta);color:var(--papel);padding:22px 20px;border-bottom:4px solid var(--latón)}
+@media(prefers-color-scheme:dark){header{background:#0a121c;color:#e6edf3}}
+header h1{font:700 1.45rem/1.2 Georgia,"Times New Roman",serif;margin:0}
+header p{margin:4px 0 0;opacity:.85;font-size:.95rem}
+main{max-width:520px;margin:0 auto;padding:22px 18px 60px}
+.paso{background:var(--blanco);border:1px solid var(--linea);border-radius:10px;padding:22px}
+h2{font:700 1.25rem/1.3 Georgia,serif;margin:0 0 6px;color:var(--tinta)}
+p.ayuda{margin:0 0 16px;color:inherit;opacity:.8;font-size:.95rem}
+label{display:block;font-weight:600;margin:14px 0 4px}
+input[type=text],input[type=email],input[type=tel]{width:100%;font:inherit;padding:13px;border:1.5px solid var(--linea);border-radius:8px;background:var(--papel);color:inherit}
+input:focus,button:focus-visible,.op:focus-within{outline:3px solid var(--mar);outline-offset:1px}
+button{font:inherit;font-weight:700;width:100%;margin-top:18px;padding:14px;border:0;border-radius:8px;background:var(--tinta);color:var(--papel);cursor:pointer}
+@media(prefers-color-scheme:dark){button{background:var(--mar);color:#08121d}}
+button.sec{background:transparent;color:var(--tinta);border:1.5px solid var(--linea)}
+button:disabled{opacity:.55;cursor:wait}
+.op{display:flex;gap:12px;align-items:center;border:1.5px solid var(--linea);border-radius:8px;padding:14px;margin:10px 0;cursor:pointer}
+.op:has(input:checked){border-color:var(--mar);border-width:2px;background:var(--papel)}
+.op input{width:22px;height:22px;accent-color:var(--mar)}
+.op b{font-size:1.05rem}
+.msg{margin-top:14px;padding:12px;border-radius:8px;font-size:.95rem}
+.msg.error{background:color-mix(in srgb,var(--error) 12%,transparent);border:1px solid var(--error);color:var(--error)}
+.msg.info{background:var(--papel);border:1px solid var(--linea)}
+.hecho{text-align:center}.hecho .sello{font-size:3rem;color:var(--ok);line-height:1}
+.pasos{display:flex;gap:6px;margin-bottom:16px}.pasos i{flex:1;height:5px;border-radius:3px;background:var(--linea)}.pasos i.on{background:var(--latón)}
+.resumen{font:700 1.2rem Georgia,serif;margin:6px 0 2px;color:var(--tinta)}
+[hidden]{display:none!important}
+</style></head><body>
+<header><h1>Votación electrónica CORTRIP</h1><p id="eleccion">Cargando elección…</p></header>
+<main>
+<div class="pasos" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+
+<section class="paso" id="p1">
+  <h2>Verifique su identidad</h2>
+  <p class="ayuda">Use los mismos datos que registró en la corporación. Le enviaremos un código por WhatsApp.</p>
+  <label for="cedula">Número de cédula</label>
+  <input id="cedula" type="text" inputmode="numeric" maxlength="10" autocomplete="off">
+  <label for="correo">Correo electrónico registrado</label>
+  <input id="correo" type="email" autocomplete="email">
+  <button id="b1">Enviar código por WhatsApp</button>
+  <div id="m1"></div>
+</section>
+
+<section class="paso" id="p2" hidden>
+  <h2>Ingrese el código</h2>
+  <p class="ayuda">Revise su WhatsApp. El código de 6 dígitos vence en 10 minutos.</p>
+  <label for="codigo">Código de verificación</label>
+  <input id="codigo" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
+  <button id="b2">Continuar a la papeleta</button>
+  <button class="sec" id="atras2" type="button">Cambiar mis datos</button>
+  <div id="m2"></div>
+</section>
+
+<section class="paso" id="p3" hidden>
+  <h2>Papeleta</h2>
+  <p class="ayuda">Elija una sola opción. Su voto es secreto: el sistema no guarda qué eligió junto a su nombre.</p>
+  <div id="opciones" role="radiogroup" aria-label="Opciones de voto"></div>
+  <button id="b3">Revisar mi voto</button>
+  <div id="m3"></div>
+</section>
+
+<section class="paso" id="p4" hidden>
+  <h2>Confirme su voto</h2>
+  <p class="ayuda">Una vez emitido no se puede cambiar.</p>
+  <div class="resumen" id="resumen"></div>
+  <button id="b4">Emitir voto definitivo</button>
+  <button class="sec" id="atras4" type="button">Volver a la papeleta</button>
+  <div id="m4"></div>
+</section>
+
+<section class="paso hecho" id="p5" hidden>
+  <div class="sello" aria-hidden="true">✓</div>
+  <h2>Voto registrado</h2>
+  <p class="ayuda">Gracias por participar. Su participación quedó anotada y su voto permanece secreto. Puede cerrar esta página.</p>
+</section>
+</main>
+<script>
+// ====== CONFIGURACIÓN (completar al publicar el backend) ======
+const API_URL = "";      // vacío = usa el mismo servicio donde está publicada esta página
+const ELECCION_ID = 1;   // id de la elección abierta
+// ==============================================================
+const $=id=>document.getElementById(id);
+const est={cedula:"",correo:"",codigo:"",opcion:null,nombre:""};
+const mostrar=n=>{for(let i=1;i<=5;i++)$("p"+i).hidden=i!==n;document.querySelectorAll(".pasos i").forEach((x,i)=>x.classList.toggle("on",i<Math.min(n,3)))};
+const aviso=(id,t,tipo="error")=>$(id).innerHTML=t?`<div class="msg ${tipo}" role="alert"></div>`:"",
+      poner=(id,t,tipo)=>{aviso(id,t,tipo);if(t)$(id).firstChild.textContent=t};
+async function api(ruta,datos){
+  const r=await fetch(API_URL+ruta,datos?{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(datos)}:{});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(j.error||"No se pudo completar la acción. Intente de nuevo.");
+  return j;
+}
+const busy=(b,v)=>b.disabled=v;
+(async()=>{try{
+  const e=await api(`/elecciones/${ELECCION_ID}/listas`);est.nombre=e.nombre;est.listas=e.listas;
+  $("eleccion").textContent=e.nombre+(e.estado==="abierta"?"":" · no está abierta");
+  if(e.estado!=="abierta")poner("m1","La votación no está abierta en este momento.");
+}catch(x){$("eleccion").textContent="Elección no disponible";poner("m1",x.message)}})();
+
+$("b1").onclick=async()=>{
+  est.cedula=$("cedula").value.trim();est.correo=$("correo").value.trim();
+  if(!/^\d{10}$/.test(est.cedula))return poner("m1","La cédula debe tener 10 dígitos.");
+  if(!/^\S+@\S+\.\S+$/.test(est.correo))return poner("m1","Escriba un correo válido.");
+  busy($("b1"),true);poner("m1","");
+  try{const r=await api("/votar/codigo",{cedula:est.cedula,correo:est.correo,eleccion:ELECCION_ID});
+    mostrar(2);poner("m2",r.codigo_prueba?"MODO DE PRUEBA: su código es "+r.codigo_prueba:r.mensaje,"info");$("codigo").focus();
+  }catch(x){poner("m1",x.message)}busy($("b1"),false)};
+$("atras2").onclick=()=>{mostrar(1);poner("m2","")};
+$("b2").onclick=()=>{
+  est.codigo=$("codigo").value.trim();
+  if(!/^\d{6}$/.test(est.codigo))return poner("m2","El código tiene 6 dígitos.");
+  if(!est.listas||!est.listas.length)return poner("m2","No hay listas cargadas para esta elección.");
+  $("opciones").innerHTML=[...est.listas.map(l=>({v:String(l.id),t:l.nombre})),{v:"BLANCO",t:"Voto en blanco"}]
+    .map(o=>`<label class="op"><input type="radio" name="op" value="${o.v}"><b></b></label>`).join("");
+  document.querySelectorAll("#opciones .op b").forEach((b,i)=>b.textContent=[...est.listas.map(l=>l.nombre),"Voto en blanco"][i]);
+  poner("m2","");mostrar(3)};
+$("b3").onclick=()=>{
+  const s=document.querySelector("input[name=op]:checked");
+  if(!s)return poner("m3","Elija una opción para continuar.");
+  est.opcion=s.value;$("resumen").textContent=s.parentElement.textContent;poner("m3","");mostrar(4)};
+$("atras4").onclick=()=>mostrar(3);
+$("b4").onclick=async()=>{
+  busy($("b4"),true);poner("m4","");
+  try{await api("/votar",{cedula:est.cedula,codigo:est.codigo,eleccion:ELECCION_ID,opcion:est.opcion});
+    est.codigo=est.opcion=null;mostrar(5);
+  }catch(x){poner("m4",x.message)}busy($("b4"),false)};
+</script></body></html>
