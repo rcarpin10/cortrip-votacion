@@ -6,9 +6,8 @@ h2{font-size:1.05rem;margin:0 0 8px}input,textarea{width:100%;font:inherit;paddi
 button{font:inherit;font-weight:700;padding:11px 16px;border:0;border-radius:8px;background:#14304f;color:#fff;margin-top:6px}
 pre{background:#eef2f6;padding:10px;border-radius:8px;white-space:pre-wrap;word-break:break-all;font-size:.85rem}</style></head><body>
 <h1>Administración CORTRIP</h1>
-<p id="ver" style="font-weight:700">Comprobando versión del servidor…</p>
-<section><h2>0. Clave de administrador</h2>
-<input id="url" type="hidden"><input id="tok" type="password" placeholder="Clave de administrador (ADMIN_TOKEN)"></section>
+<section><h2>0. Conexión</h2>
+<input id="url" placeholder="Dirección del servicio (https://...)"><input id="tok" type="password" placeholder="Clave de administrador (ADMIN_TOKEN)"></section>
 <section><h2>1. Cargar socios</h2><p>Una línea por socio: cédula,nombre,categoria,correo,whatsapp</p>
 <textarea id="soc" rows="5">0000000001,Amigo Uno,activo,uno@correo.com,+593900000001
 0000000002,Amigo Dos,activo,dos@correo.com,+593900000002</textarea><button onclick="cargar()">Cargar socios</button></section>
@@ -20,7 +19,7 @@ pre{background:#eef2f6;padding:10px;border-radius:8px;white-space:pre-wrap;word-
 <button onclick="contar()">Contar votos</button></section>
 <pre id="out">Resultado aparecerá aquí.</pre>
 <script>
-const $=i=>document.getElementById(i);$("url").value=location.origin;fetch("/version").then(r=>r.ok?r.json():Promise.reject()).then(j=>{$("ver").textContent="✅ Servidor actualizado: "+j.version;$("ver").style.color="#1d6b45"}).catch(()=>{$("ver").textContent="⚠ Servidor con versión ANTIGUA (todavía no se actualizó)";$("ver").style.color="#a3262a"});
+const $=i=>document.getElementById(i);
 async function p(r,d){try{const x=await fetch($("url").value.replace(/\/$/,"")+r,{method:"POST",headers:{"Content-Type":"application/json","x-admin-token":$("tok").value},body:JSON.stringify(d||{})});
 $("out").textContent=JSON.stringify(await x.json(),null,2)}catch(e){$("out").textContent="Error: "+e.message}}
 const cargar=()=>p("/admin/socios",{socios:$("soc").value.trim().split("\n").map(l=>{const[c,n,k,m,w]=l.split(",").map(x=>x.trim());return{cedula:c,nombre:n,categoria:k,correo:m,whatsapp:w}})});
