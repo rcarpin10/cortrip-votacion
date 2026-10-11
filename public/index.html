@@ -85,7 +85,7 @@ button:disabled{opacity:.55;cursor:wait}
 <script>
 // ====== CONFIGURACIÓN (completar al publicar el backend) ======
 const API_URL = "";      // vacío = usa el mismo servicio donde está publicada esta página
-const ELECCION_ID = 1;   // id de la elección abierta
+const ELECCION_ID = Number(new URLSearchParams(location.search).get("e")) || 1;   // elección: se toma de la dirección (?e=2); si no hay, la 1
 // ==============================================================
 const $=id=>document.getElementById(id);
 const est={cedula:"",correo:"",codigo:"",opcion:null,nombre:""};
